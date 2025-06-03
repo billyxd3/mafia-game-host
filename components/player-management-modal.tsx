@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Trash2, Plus, Edit2, Check, X } from "lucide-react"
 
@@ -25,9 +26,10 @@ interface PlayerManagementModalProps {
   onClose: () => void
   players: GamePlayer[]
   onUpdatePlayers: (players: GamePlayer[]) => void
+  roles?: { name: string; color: string; faction: string }[]
 }
 
-export function PlayerManagementModal({ open, onClose, players, onUpdatePlayers }: PlayerManagementModalProps) {
+export function PlayerManagementModal({ open, onClose, players, onUpdatePlayers, roles = [] }: PlayerManagementModalProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState("")
   const [newPlayerName, setNewPlayerName] = useState("")
@@ -78,6 +80,22 @@ export function PlayerManagementModal({ open, onClose, players, onUpdatePlayers 
       onUpdatePlayers([...players, newPlayer])
       setNewPlayerName("")
     }
+  }
+
+  const updateRole = (playerId: string, roleName: string) => {
+    const roleInfo = roles.find((r) => r.name === roleName)
+    onUpdatePlayers(
+      players.map((p) =>
+        p.id === playerId
+          ? {
+              ...p,
+              role: roleName,
+              roleColor: roleInfo?.color || p.roleColor,
+              faction: roleInfo?.faction || p.faction,
+            }
+          : p,
+      ),
+    )
   }
 
   return (
@@ -137,7 +155,21 @@ export function PlayerManagementModal({ open, onClose, players, onUpdatePlayers 
                 ) : (
                   <>
                     <span className="flex-1 text-sm">{player.name}</span>
-                    <div className={`px-2 py-1 rounded text-xs ${player.roleColor}`}>{player.role}</div>
+                    <Select
+                      value={player.role}
+                      onValueChange={(val) => updateRole(player.id, val)}
+                    >
+                      <SelectTrigger className="w-32 bg-gray-700 border-gray-600 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-700 border-gray-600 text-xs">
+                        {roles.map((r) => (
+                          <SelectItem key={r.name} value={r.name}>
+                            {r.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <Button size="sm" variant="ghost" onClick={() => startEdit(player)}>
                       <Edit2 className="w-3 h-3" />
                     </Button>

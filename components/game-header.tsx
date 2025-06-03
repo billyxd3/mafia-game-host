@@ -1,9 +1,30 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Sun, Moon, Flag, Home } from "lucide-react"
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+  RotateCw,
+  Shuffle,
+  Info,
+  Sun,
+  Moon,
+  Flag,
+  Home,
+} from "lucide-react"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import Link from "next/link"
+import { InfoModal } from "./info-modal"
 
 interface GameHeaderProps {
   gameId: string
@@ -16,6 +37,7 @@ interface GameHeaderProps {
   onTogglePhase: () => void
   onEndGame: () => void
   onReshuffleRoles: () => void
+  onReshuffleAll: () => void
   onPreviousStep?: () => void
   onNextStep?: () => void
   currentSpeaker?: string
@@ -32,10 +54,12 @@ export function GameHeader({
   onTogglePhase,
   onEndGame,
   onReshuffleRoles,
+  onReshuffleAll,
   onPreviousStep,
   onNextStep,
   currentSpeaker,
 }: GameHeaderProps) {
+  const [showInfo, setShowInfo] = useState(false)
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -53,8 +77,9 @@ export function GameHeader({
   }
 
   return (
-    <div className="sticky top-0 z-50 mafia-header">
-      <div className="container mx-auto flex items-center justify-between px-4 py-4">
+    <TooltipProvider delayDuration={0}>
+      <div className="sticky top-0 z-50 mafia-header">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
         {/* Phase Label & Game Info */}
         <div className="flex items-center gap-6">
           <Link href="/" className="text-gray-400 hover:text-yellow-600 transition-colors">
@@ -89,39 +114,98 @@ export function GameHeader({
 
         {/* Controls */}
         <div className="flex items-center gap-3">
-          <Button
-            size="sm"
-            onClick={onToggleTimer}
-            className={isTimerRunning ? "mafia-btn-primary" : "mafia-btn-secondary"}
-          >
-            {isTimerRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                onClick={onToggleTimer}
+                className={isTimerRunning ? "mafia-btn-primary" : "mafia-btn-secondary"}
+              >
+                {isTimerRunning ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Play/Pause Timer</TooltipContent>
+          </Tooltip>
 
           {onPreviousStep && (
-            <Button size="sm" onClick={onPreviousStep} className="mafia-btn-secondary">
-              <SkipBack className="w-5 h-5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" onClick={onPreviousStep} className="mafia-btn-secondary">
+                  <SkipBack className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Previous Speaker</TooltipContent>
+            </Tooltip>
           )}
 
           {onNextStep && (
-            <Button size="sm" onClick={onNextStep} className="mafia-btn-secondary">
-              <SkipForward className="w-5 h-5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" onClick={onNextStep} className="mafia-btn-secondary">
+                  <SkipForward className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">Next Speaker</TooltipContent>
+            </Tooltip>
           )}
 
-          <Button size="sm" onClick={onReshuffleRoles} className="mafia-btn-secondary">
-            <RotateCcw className="w-5 h-5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={() => onResetTimer()} className="mafia-btn-secondary">
+                <RotateCcw className="w-5 h-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Reset Timer</TooltipContent>
+          </Tooltip>
 
-          <Button size="sm" onClick={onTogglePhase} className="mafia-btn-secondary">
-            {gamePhase === "day" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={onReshuffleRoles} className="mafia-btn-secondary">
+                <Shuffle className="w-5 h-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Reshuffle Roles</TooltipContent>
+          </Tooltip>
 
-          <Button size="sm" onClick={onEndGame} className="bg-red-800 hover:bg-red-700 text-white">
-            <Flag className="w-5 h-5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={onReshuffleAll} className="mafia-btn-secondary">
+                <RotateCw className="w-5 h-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Restart &amp; Reshuffle</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={onTogglePhase} className="mafia-btn-secondary">
+                {gamePhase === "day" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Toggle Phase</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={onEndGame} className="bg-red-800 hover:bg-red-700 text-white">
+                <Flag className="w-5 h-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">End Game</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="sm" onClick={() => setShowInfo(true)} className="mafia-btn-secondary">
+                <Info className="w-5 h-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">How to Use</TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>
+    <InfoModal open={showInfo} onClose={() => setShowInfo(false)} />
+  </TooltipProvider>
   )
 }
