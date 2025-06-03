@@ -29,6 +29,7 @@ interface NightWizardProps {
   onPhaseComplete: () => void
   onResetTimer: (seconds: number) => void
   onTogglePhase: () => void
+  onCheckWinCondition?: () => void
 }
 
 const steps: { id: NightStep; title: string; description: string; icon: string }[] = [
@@ -47,6 +48,7 @@ export function NightWizard({
   onPhaseComplete,
   onResetTimer,
   onTogglePhase,
+  onCheckWinCondition,
 }: NightWizardProps) {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null)
   const [nightActions, setNightActions] = useState<Record<string, string>>({})
@@ -83,11 +85,18 @@ export function NightWizard({
 
     // Only kill if not healed by doctor
     if (killedPlayerId && killedPlayerId !== healedPlayerId) {
-      setPlayers(players.map((p) => (p.id === killedPlayerId ? { ...p, isAlive: false } : p)))
+      setPlayers(
+        players.map((p) =>
+          p.id === killedPlayerId
+            ? { ...p, isAlive: false, isNominated: false, isSpeaking: false, votes: 0 }
+            : p,
+        ),
+      )
     }
 
     // Reset for next night
     setNightActions({})
+    onCheckWinCondition?.()
     onPhaseComplete()
   }
 

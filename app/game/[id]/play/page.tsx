@@ -278,6 +278,7 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
                 onPhaseComplete={togglePhase}
                 onResetTimer={resetTimer}
                 onTogglePhase={togglePhase}
+                onCheckWinCondition={checkWinCondition}
               />
             ) : (
               <DayPhasePanel
