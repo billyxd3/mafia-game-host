@@ -2,7 +2,19 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, SkipBack, SkipForward, RotateCcw, Sun, Moon, Flag, Home } from "lucide-react"
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+  RotateCw,
+  Shuffle,
+  Sun,
+  Moon,
+  Flag,
+  Home,
+} from "lucide-react"
 import Link from "next/link"
 
 interface GameHeaderProps {
@@ -16,6 +28,7 @@ interface GameHeaderProps {
   onTogglePhase: () => void
   onEndGame: () => void
   onReshuffleRoles: () => void
+  onReshuffleAll: () => void
   onPreviousStep?: () => void
   onNextStep?: () => void
   currentSpeaker?: string
@@ -32,6 +45,7 @@ export function GameHeader({
   onTogglePhase,
   onEndGame,
   onReshuffleRoles,
+  onReshuffleAll,
   onPreviousStep,
   onNextStep,
   currentSpeaker,
@@ -109,8 +123,16 @@ export function GameHeader({
             </Button>
           )}
 
-          <Button size="sm" onClick={onReshuffleRoles} className="mafia-btn-secondary">
+          <Button size="sm" onClick={() => onResetTimer()} className="mafia-btn-secondary">
             <RotateCcw className="w-5 h-5" />
+          </Button>
+
+          <Button size="sm" onClick={onReshuffleRoles} className="mafia-btn-secondary">
+            <Shuffle className="w-5 h-5" />
+          </Button>
+
+          <Button size="sm" onClick={onReshuffleAll} className="mafia-btn-secondary">
+            <RotateCw className="w-5 h-5" />
           </Button>
 
           <Button size="sm" onClick={onTogglePhase} className="mafia-btn-secondary">

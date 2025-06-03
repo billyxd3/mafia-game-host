@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlayerList } from "@/components/player-list"
 import { RoleConfigurator } from "@/components/role-configurator"
@@ -29,23 +35,29 @@ interface Role {
   isCustom?: boolean
 }
 
-const defaultRoles: Role[] = [
-  { id: "don", name: "Don Mafia", faction: "mafia", color: "bg-black text-white", count: 1 },
-  { id: "mafia", name: "Mafia", faction: "mafia", color: "bg-red-600 text-white", count: 2 },
-  { id: "detective", name: "Detective", faction: "city", color: "bg-blue-600 text-white", count: 1 },
-  { id: "doctor", name: "Doctor", faction: "city", color: "bg-green-600 text-white", count: 1 },
-  { id: "citizen", name: "Citizen", faction: "city", color: "bg-yellow-600 text-black", count: 3 },
+const roleTemplates = [
+  { id: "don", name: "Don Mafia", faction: "mafia", color: "bg-black text-white" },
+  { id: "mafia", name: "Mafia", faction: "mafia", color: "bg-red-600 text-white" },
+  { id: "detective", name: "Detective", faction: "city", color: "bg-blue-600 text-white" },
+  { id: "doctor", name: "Doctor", faction: "city", color: "bg-green-600 text-white" },
+  { id: "citizen", name: "Citizen", faction: "city", color: "bg-yellow-600 text-black" },
+]
+
+const getDefaultRoles = (playerCount: number): Role[] => [
+  { ...roleTemplates[0], count: 1 },
+  { ...roleTemplates[1], count: 2 },
+  { ...roleTemplates[2], count: 1 },
+  { ...roleTemplates[3], count: 1 },
+  { ...roleTemplates[4], count: Math.max(0, playerCount - 5) },
 ]
 
 export default function LobbyPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [players, setPlayers] = useState<Player[]>([])
   const [playerInput, setPlayerInput] = useState("")
-  const [roles, setRoles] = useState<Role[]>(defaultRoles)
+  const [roles, setRoles] = useState<Role[]>(getDefaultRoles(0))
   const [speechTimer, setSpeechTimer] = useState("60")
-  const [nightTimer, setNightTimer] = useState("30")
   const [customSpeechTimer, setCustomSpeechTimer] = useState("")
-  const [customNightTimer, setCustomNightTimer] = useState("")
   const [maxSelfHeals, setMaxSelfHeals] = useState(2)
   const [showCustomRoleModal, setShowCustomRoleModal] = useState(false)
 
@@ -58,6 +70,7 @@ export default function LobbyPage({ params }: { params: { id: string } }) {
       seatNumber: index + 1,
     }))
     setPlayers(newPlayers)
+    setRoles(getDefaultRoles(newPlayers.length))
   }
 
   const totalRoles = roles.reduce((sum, role) => sum + role.count, 0)
@@ -70,7 +83,6 @@ export default function LobbyPage({ params }: { params: { id: string } }) {
         players,
         roles,
         speechTimer: speechTimer === "custom" ? customSpeechTimer : speechTimer,
-        nightTimer: nightTimer === "custom" ? customNightTimer : nightTimer,
         maxSelfHeals,
       }
       localStorage.setItem(`game-${params.id}`, JSON.stringify(gameConfig))
@@ -191,30 +203,6 @@ export default function LobbyPage({ params }: { params: { id: string } }) {
                   )}
                 </div>
 
-                <div>
-                  <Label>Night Action Timer</Label>
-                  <Select value={nightTimer} onValueChange={setNightTimer}>
-                    <SelectTrigger className="bg-gray-700 border-gray-600">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-700 border-gray-600">
-                      <SelectItem value="30">30 seconds</SelectItem>
-                      <SelectItem value="60">60 seconds</SelectItem>
-                      <SelectItem value="90">90 seconds</SelectItem>
-                      <SelectItem value="120">120 seconds</SelectItem>
-                      <SelectItem value="custom">Custom</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {nightTimer === "custom" && (
-                    <Input
-                      type="number"
-                      placeholder="Enter seconds"
-                      value={customNightTimer}
-                      onChange={(e) => setCustomNightTimer(e.target.value)}
-                      className="mt-2 bg-gray-700 border-gray-600"
-                    />
-                  )}
-                </div>
 
                 <div>
                   <Label className="flex items-center gap-2">
