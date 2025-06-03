@@ -32,6 +32,7 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
   const [nightStep, setNightStep] = useState<NightStep>("mafia-kill")
   const [showEndGameModal, setShowEndGameModal] = useState(false)
   const [showReshuffleModal, setShowReshuffleModal] = useState(false)
+  const [showReshuffleRolesModal, setShowReshuffleRolesModal] = useState(false)
   const [gameWinner, setGameWinner] = useState<"mafia" | "city" | null>(null)
 
   const [players, setPlayers] = useState<GamePlayer[]>([])
@@ -73,7 +74,7 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     }
   }, [params.id])
 
-  // Add reshuffle function
+  // Reshuffle roles only
   const reshuffleRoles = () => {
     if (!gameConfig) return
 
@@ -99,14 +100,10 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     // Shuffle roles
     const shuffledRoles = [...roleArray].sort(() => Math.random() - 0.5)
 
-    // Shuffle players (but keep their original data)
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5)
-
-    // Assign shuffled players to seats 1, 2, 3... in order with shuffled roles
+    // Assign shuffled roles to existing players keeping their seats
     setPlayers(
-      shuffledPlayers.map((player, index) => ({
+      players.map((player, index) => ({
         ...player,
-        seatNumber: index + 1, // Seats always stay in order 1, 2, 3, 4...
         role: shuffledRoles[index],
         roleColor:
           gameConfig.roles.find((r: any) => r.name === shuffledRoles[index])?.color || "bg-gray-600 text-white",
@@ -119,6 +116,50 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     )
 
     // Reset game state
+    setGamePhase("day")
+    setDayNumber(1)
+    setNightActions({})
+  }
+
+  // Reshuffle roles and positions
+  const reshuffleAll = () => {
+    if (!gameConfig) return
+
+    const roleArray: string[] = []
+    gameConfig.roles.forEach((role: any) => {
+      for (let i = 0; i < role.count; i++) {
+        roleArray.push(role.name)
+      }
+    })
+
+    const citizenRole =
+      gameConfig.roles.find((r: any) => r.name.toLowerCase() === "citizen") ?? {
+        name: "Citizen",
+        color: "bg-yellow-600 text-black",
+        faction: "city",
+      }
+    while (players.length > roleArray.length) {
+      roleArray.push(citizenRole.name)
+    }
+
+    const shuffledRoles = [...roleArray].sort(() => Math.random() - 0.5)
+    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5)
+
+    setPlayers(
+      shuffledPlayers.map((player, index) => ({
+        ...player,
+        seatNumber: index + 1,
+        role: shuffledRoles[index],
+        roleColor:
+          gameConfig.roles.find((r: any) => r.name === shuffledRoles[index])?.color || "bg-gray-600 text-white",
+        faction: gameConfig.roles.find((r: any) => r.name === shuffledRoles[index])?.faction || "city",
+        isAlive: true,
+        isNominated: false,
+        isSpeaking: false,
+        votes: 0,
+      })),
+    )
+
     setGamePhase("day")
     setDayNumber(1)
     setNightActions({})
@@ -150,6 +191,16 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     setTimeRemaining(seconds)
     setIsTimerRunning(true) // Auto-start timer when reset
   }
+
+  // Keyboard navigation for speakers
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") moveToNextSpeaker()
+      if (e.key === "ArrowLeft") moveToPreviousSpeaker()
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [moveToNextSpeaker, moveToPreviousSpeaker])
 
   const moveToNextSpeaker = () => {
     const alivePlayers = players.filter((p) => p.isAlive)
@@ -260,7 +311,8 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
         onResetTimer={resetTimer}
         onTogglePhase={togglePhase}
         onEndGame={() => setShowEndGameModal(true)}
-        onReshuffleRoles={() => setShowReshuffleModal(true)}
+        onReshuffleRoles={() => setShowReshuffleRolesModal(true)}
+        onReshuffleAll={() => setShowReshuffleModal(true)}
         onPreviousStep={moveToPreviousSpeaker}
         onNextStep={moveToNextSpeaker}
         currentSpeaker={players.find((p) => p.isSpeaking)?.name}
@@ -276,6 +328,7 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
               gamePhase={gamePhase}
               onEliminatePlayer={eliminatePlayer}
               onRevivePlayer={revivePlayer}
+              availableRoles={gameConfig?.roles}
             />
           </div>
 
@@ -313,12 +366,25 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
       />
 
       <ReshuffleModal
+        open={showReshuffleRolesModal}
+        onClose={() => setShowReshuffleRolesModal(false)}
+        onConfirm={() => {
+          reshuffleRoles()
+          setShowReshuffleRolesModal(false)
+        }}
+        title="Reshuffle Roles"
+        message="All players will keep their seats but receive new roles."
+      />
+
+      <ReshuffleModal
         open={showReshuffleModal}
         onClose={() => setShowReshuffleModal(false)}
         onConfirm={() => {
-          reshuffleRoles()
+          reshuffleAll()
           setShowReshuffleModal(false)
         }}
+        title="Restart & Reshuffle"
+        message="Players will be reseated and assigned new roles."
       />
     </div>
   )
