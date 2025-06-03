@@ -84,6 +84,18 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
       }
     })
 
+    // If more players than roles (e.g. players added mid-game),
+    // pad the role array with default "Citizen" roles
+    const citizenRole =
+      gameConfig.roles.find((r: any) => r.name.toLowerCase() === "citizen") ?? {
+        name: "Citizen",
+        color: "bg-yellow-600 text-black",
+        faction: "city",
+      }
+    while (players.length > roleArray.length) {
+      roleArray.push(citizenRole.name)
+    }
+
     // Shuffle roles
     const shuffledRoles = [...roleArray].sort(() => Math.random() - 0.5)
 

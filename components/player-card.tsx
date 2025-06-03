@@ -45,12 +45,14 @@ export function PlayerCard({
   totalVotesUsed,
   totalAlivePlayers,
 }: PlayerCardProps) {
-  const getRoleClass = (role: string) => {
-    if (role.toLowerCase().includes("don")) return "role-don text-white"
-    if (role.toLowerCase().includes("mafia")) return "role-mafia text-white"
-    if (role.toLowerCase().includes("detective")) return "role-detective text-white"
-    if (role.toLowerCase().includes("doctor")) return "role-doctor text-white"
-    if (role.toLowerCase().includes("citizen")) return "role-citizen text-black"
+  const getRoleClass = (role: string | undefined) => {
+    if (!role) return "bg-gray-600 text-white"
+    const lower = role.toLowerCase()
+    if (lower.includes("don")) return "role-don text-white"
+    if (lower.includes("mafia")) return "role-mafia text-white"
+    if (lower.includes("detective")) return "role-detective text-white"
+    if (lower.includes("doctor")) return "role-doctor text-white"
+    if (lower.includes("citizen")) return "role-citizen text-black"
     return "bg-gray-600 text-white"
   }
 
