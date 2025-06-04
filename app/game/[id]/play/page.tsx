@@ -192,6 +192,16 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     setIsTimerRunning(true) // Auto-start timer when reset
   }
 
+  // Keyboard navigation for speakers
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") moveToNextSpeaker()
+      if (e.key === "ArrowLeft") moveToPreviousSpeaker()
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [moveToNextSpeaker, moveToPreviousSpeaker])
+
   const moveToNextSpeaker = () => {
     const alivePlayers = players.filter((p) => p.isAlive)
     if (alivePlayers.length === 0) return
