@@ -1,5 +1,7 @@
 "use client"
 
+// Sticky header with timer controls, phase toggles, reshuffle actions, and a help modal
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
