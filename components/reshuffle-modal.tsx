@@ -8,23 +8,30 @@ interface ReshuffleModalProps {
   open: boolean
   onClose: () => void
   onConfirm: () => void
+  title?: string
+  message?: string
 }
 
-export function ReshuffleModal({ open, onClose, onConfirm }: ReshuffleModalProps) {
+export function ReshuffleModal({
+  open,
+  onClose,
+  onConfirm,
+  title = "Reshuffle Roles",
+  message = "Are you sure you want to reshuffle all player roles? This action cannot be undone and will randomly reassign roles to all players.",
+}: ReshuffleModalProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="bg-gray-800 border-gray-700 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-yellow-400" />
-            Reshuffle Roles
+            {title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <p className="text-gray-300">
-            Are you sure you want to reshuffle all player roles? This action cannot be undone and will randomly reassign
-            roles to all players.
+            {message}
           </p>
 
           <div className="flex gap-2">

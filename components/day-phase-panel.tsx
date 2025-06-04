@@ -60,6 +60,9 @@ export function DayPhasePanel({
       // Execute the player
       onEliminatePlayer(playerToExecute.id)
 
+      // Give the executed player 30 seconds for last words
+      onResetTimer(30)
+
       // Reset nominations and votes for all players
       setPlayers((prev) => prev.map((p) => ({ ...p, isNominated: false, votes: 0 })))
       setVotesLocked(false)

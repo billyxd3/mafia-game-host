@@ -8,6 +8,11 @@ A modern, web-based implementation of the classic party game "Mafia" (also known
 - 👥 Support for multiple players in a single game session
 - 🎭 Role assignment for players (Mafia, Citizens, etc.)
 - ⏱️ Game timer and phase management
+- 🔀 Automatic role assignment when pasting players
+- ↩️ Keyboard hotkeys for navigating speakers
+- 💡 Tooltips and a help modal describing controls
+- 🔁 Buttons to reshuffle roles or restart the game
+- ✏️ In-game role editing for players
 - 🎨 Modern, responsive UI with dark/light theme support
 - 🔄 Real-time game state synchronization
 
