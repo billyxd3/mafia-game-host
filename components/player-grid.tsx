@@ -31,7 +31,6 @@ interface PlayerGridProps {
 export function PlayerGrid({ players, setPlayers, gamePhase, onEliminatePlayer, onRevivePlayer, availableRoles }: PlayerGridProps) {
   const [showPlayerManagement, setShowPlayerManagement] = useState(false)
 
-  // Add the existing functions...
   const togglePlayerStatus = (playerId: string, status: "nominated" | "speaking") => {
     setPlayers(
       players.map((p) => {

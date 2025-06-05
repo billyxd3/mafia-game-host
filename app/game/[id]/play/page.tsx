@@ -223,6 +223,7 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
     )
   }
 
+
   const moveToPreviousSpeaker = () => {
     const alivePlayers = players.filter((p) => p.isAlive)
     if (alivePlayers.length === 0) return
@@ -243,6 +244,16 @@ export default function GameDashboard({ params }: { params: { id: string } }) {
       prev.map((p, index) => (index === prevIndex ? { ...p, isSpeaking: true } : { ...p, isSpeaking: false })),
     )
   }
+
+  // Keyboard navigation for speakers
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") moveToNextSpeaker()
+      if (e.key === "ArrowLeft") moveToPreviousSpeaker()
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [moveToNextSpeaker, moveToPreviousSpeaker])
 
   const togglePhase = () => {
     if (gamePhase === "day") {
